@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>BEYOND | AR Exhibition</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    :root {
+      --panel-bg: rgba(10, 10, 10, 0.28);
+      --panel-border: rgba(255, 255, 255, 0.18);
+      --button-bg: rgba(255, 255, 255, 0.08);
+      --button-border: rgba(255, 255, 255, 0.32);
+      --button-text: rgba(255, 255, 255, 0.94);
+      --button-active-bg: rgba(255, 255, 255, 0.94);
+      --button-active-text: #111;
+      --muted-text: rgba(255, 255, 255, 0.78);
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .controls {
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: calc(16px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(92vw, 540px);
+      padding: 12px;
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.26);
+    }
+
+    .hint {
+      margin: 0 0 10px;
+      text-align: center;
+      color: var(--muted-text);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .buttons button {
+      appearance: none;
+      -webkit-appearance: none;
+      min-height: 54px;
+      padding: 10px 8px;
+      border-radius: 13px;
+      border: 1px solid var(--button-border);
+      background: var(--button-bg);
+      color: var(--button-text);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease, box-shadow .2s ease;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .buttons button:active {
+      transform: scale(0.985);
+    }
+
+    .buttons button.active {
+      background: var(--button-active-bg);
+      color: var(--button-active-text);
+      border-color: rgba(255,255,255,0.95);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.14);
+    }
+
+    .buttons button:focus-visible {
+      outline: 2px solid rgba(255,255,255,0.9);
+      outline-offset: 2px;
+    }
+
+    .label-main {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+
+    .label-sub {
+      display: block;
+      margin-top: 2px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      opacity: 0.62;
+      text-transform: uppercase;
+    }
+
+    .buttons button.active .label-sub {
+      opacity: 0.52;
+    }
+
+    #status {
+      min-height: 13px;
+      margin: 8px 0 0;
+      text-align: center;
+      color: var(--muted-text);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+    }
+
+    @media (max-width: 420px) {
+      .controls {
+        width: min(94vw, 540px);
+        padding: 10px;
+      }
+      .buttons button {
+        min-height: 50px;
+        padding: 8px 6px;
+      }
+      .label-main {
+        font-size: 12px;
+      }
+      .label-sub {
+        font-size: 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind;"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+    <a-assets>
+      <video id="movie" src="./traveler-alpha.webm" preload="auto" autoplay loop muted playsinline webkit-playsinline></video>
+    </a-assets>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-entity id="poster-target" mindar-image-target="targetIndex: 0">
+      <a-plane position="0 0 0.01" width="1" height="1.414" material="shader: flat; src: #movie; transparent: true; alphaTest: 0.01;"></a-plane>
+    </a-entity>
+  </a-scene>
+
+  <div class="controls">
+    <p class="hint">ポスターにカメラを向けてください</p>
+    <div class="buttons" role="group" aria-label="AR作品の切り替え">
+      <button type="button" data-source="./traveler-alpha.webm" class="active" aria-pressed="true">
+        <span class="label-main">道をゆく者</span>
+      </button>
+      <button type="button" data-source="./bird-alpha.webm" aria-pressed="false">
+        <span class="label-main">風をゆく者</span>
+      </button>
+      <button type="button" data-source="./colossus-alpha.webm" aria-pressed="false">
+        <span class="label-main">大地をゆく者</span>
+      </button>
+    </div>
+    <p id="status" role="status" aria-live="polite"></p>
+  </div>
+
+  <script>
+    const movie = document.getElementById('movie');
+    const buttons = [...document.querySelectorAll('[data-source]')];
+    const status = document.getElementById('status');
+    const target = document.getElementById('poster-target');
+    let chosenSource = './traveler-alpha.webm';
+    let inView = false;
+    let switchCounter = 0;
+
+    async function startVideo() {
+      if (!inView || movie.readyState < 2) return;
+      try {
+        await movie.play();
+        status.textContent = '';
+      } catch (error) {
+        status.textContent = '映像が始まらない場合は、もう一度ボタンを押してください';
+      }
+    }
+
+    function switchVideo(source) {
+      if (source === chosenSource) {
+        startVideo();
+        return;
+      }
+      chosenSource = source;
+      const thisSwitch = ++switchCounter;
+      buttons.forEach((button) => {
+        const active = button.dataset.source === source;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      status.textContent = '作品を切り替えています…';
+      movie.pause();
+      movie.src = source;
+      movie.load();
+      movie.addEventListener('loadeddata', () => {
+        if (thisSwitch !== switchCounter) return;
+        status.textContent = '';
+        startVideo();
+      }, { once: true });
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => switchVideo(button.dataset.source));
+    });
+
+    target.addEventListener('targetFound', () => {
+      inView = true;
+      startVideo();
+    });
+
+    target.addEventListener('targetLost', () => {
+      inView = false;
+      movie.pause();
+    });
+
+    document.addEventListener('touchstart', () => { startVideo(); }, { passive: true });
+  </script>
+</body>
+</html>
